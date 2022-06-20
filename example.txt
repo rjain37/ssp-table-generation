@@ -1,0 +1,36 @@
+Sarim, 0, 1
+Sabrina, 1, 2
+Kyra, 1, 3
+Savar, 0, 4
+Sam, 0, 1
+Fernanda, 1, 4
+Srijan, 0, 3
+Gabriele, 0, 5
+Celine, 1, 6
+Ryan F., 0, 11
+Ryan E., 0, 10
+Natalie, 1, 11
+Lucy K., 1, 2
+Navit, 0, 3
+Arthur, 0, 7
+JD, 0, 9
+Josiah, 0, 7
+Drew, 0, 9
+Rohan, 0, 12
+Antonio, 0, 10
+Sonia, 1, 1
+Lucy G., 1, 12
+Ai-Dan, 1, 7
+Sophie, 1, 8
+Oliver, 0, 5
+Calvin, 0, 6
+Fer, 1, 6
+Vicki, 1, 10
+Dipakshi, 1, 12
+Ria, 1, 8
+Kai, 0, 2
+Victoria, 1, 11
+Nico, 0, 8
+Vicky, 1, 5
+Megan, 1, 9
+Moer, 1, 4
