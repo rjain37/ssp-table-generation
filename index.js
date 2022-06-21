@@ -39,10 +39,8 @@ function getFileText()
     return fileText;
 }
 
-function runPy(){
-    return i;
-}
-
 function realPrint(str){
     document.getElementById("tableDiv").innerHTML += str + "<br>";
 }
+
+console.log('Check the code out at https://github.com/rjain37/ssp-table-generation');
