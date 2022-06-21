@@ -26,10 +26,10 @@
 
     <body>
         <div class = "container" style = "display: flex; justify-content: center;">
-            <img src="logo.jpg" alt="SSP Logo" height = "112" width = "200">
+            <a href = "/"><img src="logo.jpg" alt="SSP Logo" height = "112" width = "200"></a>
         </div>
 
-        <div class = "container border" style = "display: block;" id = "formDiv">
+        <div class = "container border big" style = "display: block;" id = "formDiv">
             <form method = "POST" id = "form">
                 <div class="form-group">
                   <label for="numberOfTables">Number of Tables</label>
@@ -80,7 +80,7 @@
             def run(self):
                 #Create a 2D array for people. Each entry is of the form[sex, group_id1, group_id2]
                 #Female = 1, Male = 0
-                number_of_predictions = 5
+                number_of_predictions = 6
                 ID_NAME = {}
                 people = []
 
@@ -112,8 +112,7 @@
                 # people = make_people("example.txt")
 
                 NUM_ROAMERS = len(people)
-                NUM_TABLES = js.getTables()
-                NUM_TABLES = 7
+                NUM_TABLES = int(js.getTables())
 
                 #Create a distance matrix for the quadratic assignment problem
                 table_distance_matrix = np.zeros((NUM_ROAMERS, NUM_ROAMERS))
@@ -199,33 +198,12 @@
 
                     #DON'T DELETE OR OPEN OR LOOK OR READ OR COPY
                     def ignore():
-                        if(current_week % 2 == 0):
-                            num1 = 7
-                            num2 = 29
-                        else:
-                            num1 = 24
-                            num2 = 27
-                        swapper = 0
-                        for i in range(len(table_list)):
-                            for j in range(len(table_list[i])):
-                                if(table_list[i][j] == num1):
-                                    Gy = i
-                                    Gx = j
-                                elif(table_list[i][j] == num2):
-                                    Ry = i
-                                    Rx = j
-                        if(Gx != 0):
-                            holder = table_list[Gy][0]
-                            table_list[Gy][0] = table_list[Ry][Rx]
-                            table_list[Ry][Rx] = holder
-                        else:
-                            holder = table_list[Gy][1]
-                            table_list[Gy][1] = table_list[Ry][Rx]
-                            table_list[Ry][Rx] = holder
-                    # ignore()
+                        # what was here?!?!?
+                        return None
 
                     #Now start printing Assignments
-                    ID_NAME[0] = "xx" + ID_NAME[0]
+                    if current_week == 1:
+                        ID_NAME[0] = "xx" + ID_NAME[0]
                     js.realPrint("Week " + str(current_week) + " Assignments")
                     current_table = 1
                     for table in table_list:
@@ -244,7 +222,7 @@
                     current_week += 1
         </py-script>
 
-        <div class = "container border" style = "display: none;" id = "tableDiv">
+        <div class = "container border big" style = "display: none;" id = "tableDiv">
             <button type="button" id="button" class = "btn btn-primary" pys-onClick = "run">Display Tables</button>
             <br>
         </div>
@@ -252,7 +230,8 @@
         <script src="index.js"></script>
     </body>
 
-    <footer>
-
+    <footer class="text-center text-dark p-3 fixed-bottom" style="background-color: #f1f1f1;">
+        Created by Oliver Lin, Rohan Jain, Gabriel di Gianluca, and Nico von Eckenberg of SSP UNC 2022.
+        <br>
     </footer>
 </html>
