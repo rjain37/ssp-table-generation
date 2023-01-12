@@ -20,81 +20,78 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     
         <!--pyscript-->
-        <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+        <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css"/>
         <script defer src="https://pyscript.net/unstable/pyscript.js"></script>
     </head>
-
+    <style>
+        #outputDiv{
+            font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace; 
+            font-size: 11.5px; 
+            font-style: normal; 
+            font-variant: normal; 
+            font-weight: 600; 
+            line-height: 13px;
+        }
+        body{
+            box-sizing:border-box;
+            padding:0 0 55px; /* make space for footer */
+        }
+    </style>
     <body>
         <div class = "container" style = "display: flex; justify-content: center;">
             <a href = "/"><img src="logo.jpg" alt="SSP Logo" height = "112" width = "200"></a>
         </div>
 
         <div class = "container border big" style = "display: block;" id = "formDiv">
-            <form method = "POST" id = "form">
-                <div class="form-group">
-                  <label for="numberOfTables">Number of Tables</label>
-                  <input type="number" class="form-control" id="numberOfTables" aria-describedby="numberOfTables" placeholder="Number of Tables as an integer">
-                </div>
-                <div class="form-group">
-                    <label for="studentList">List of Students with name, sex, group number (example file <a href = "example.txt">here</a>)</label>
-                    <input type="file" class="form-control" id="studentList" aria-describedby="studentList" placeholder="Student list as a .txt file">
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
+            <iframe name="k" style="display:none;"></iframe>
+            <form target="k">
+                <label for="numberOfTables">Number of Tables</label>
+                <input type="number" class="form-control" id="numberOfTables" aria-describedby="numberOfTables" placeholder="Number of Tables as an integer">
+
+                <label for="studentList">List of Students with name, sex, group number (example file <a href = "example.txt" style="color:blue">here</a>)</label>
+                <input type="file" class="form-control" id="studentList" aria-describedby="studentList" placeholder="Student list as a .txt file"><br>
+                <div id="fileInput"></div>
+                
+                <input type="submit" id="button" class = "btn btn-primary" py-click="test()" value="Display Tables"/>
+            </form>
+        </div>
+        <div class = "container border big"  id="outputDiv">
         </div>
 
-    <py-config>
-      packages = ["scipy", "numpy"]
-    </py-config>
+        <p id="temp" style="display:none;"></p>
 
+        <py-config style="display:none;">
+            packages = ["numpy", "scipy", ]
+        </py-config>
 
         <py-script>
             import js
+            from js import document, FileReader
+            from pyodide.ffi import create_proxy
+            import asyncio
             from scipy.optimize import quadratic_assignment
             import numpy as np
             from math import ceil
-            from pyodide import create_proxy
 
-            def make_people(filename):
-                file = open(filename, "r")
-                people = file.read().splitlines()
-                for i in range(len(people)):
-                    people[i] = people[i].split(", ")
-                    ID_NAME[i] = people[i][0]
-                    people[i] = i, int(people[i][1]), int(people[i][2]) - 1
-                groups = [[0 for i in range(1)] for j in range(12)]
-                for i in range(len(people)):
-                    groups[people[i][2]].append(people[i][0])
-                for i in range(len(groups)):
-                    del groups[i][0]
-                for i in range(len(people)):
-                    for j in groups[people[i][2]]:
-                        if j != people[i][0]:
-                            people[i] = list(people[i])
-                            people[i].append(j)
-                for i in range(len(people)):
-                    del people[i][0]
-                    del people[i][1]
-                return people
-            
-            def run(self):
-                #Create a 2D array for people. Each entry is of the form[sex, group_id1, group_id2]
-                #Female = 1, Male = 0
-                number_of_predictions = 6
+            NUM_TABLES = 0
+            result_place = Element("outputDiv")
+            number_of_predictions = 6
+            text = ""
+
+            def read_complete(event):
+                content = document.getElementById("temp");
+                for line in event.target.result.splitlines():
+                    content.innerHTML += line + '<br>'
+                text = content.innerHTML
+                people = text.split('<br>')
+                people.pop()
                 ID_NAME = {}
-                people = []
 
-                # peopleFileText = "Sarim, 0, 1\nSabrina, 1, 2\nKyra, 1, 3\nSavar, 0, 4\nSam, 0, 1\nFernanda, 1, 4\nSrijan, 0, 3\nGabriele, 0, 5\nCeline, 1, 6\nRyan F., 0, 11\nRyan E., 0, 10\nNatalie, 1, 11\nLucy K., 1, 2\nNavit, 0, 3\nArthur, 0, 7\nJD, 0, 9\nJosiah, 0, 7\nDrew, 0, 9\nRohan, 0, 12\nAntonio, 0, 10\nSonia, 1, 1\nLucy G., 1, 12\nAi-Dan, 1, 7\nSophie, 1, 8\nOliver, 0, 5\nCalvin, 0, 6\nFer, 1, 6\nVicki, 1, 10\nDipakshi, 1, 12\nRia, 1, 8\nKai, 0, 2\nVictoria, 1, 11\nNico, 0, 8\nVicky, 1, 5\nMegan, 1, 9\nMoer, 1, 4"
-                peopleFileText = js.getFileText()
-                file = open("people.txt", "w")
-                file.write(peopleFileText)
-                file.close()
-                file = open("people.txt", "r")
-                people = file.read().splitlines()
                 for i in range(len(people)):
                     people[i] = people[i].split(", ")
                     ID_NAME[i] = people[i][0]
-                    people[i] = i, int(people[i][1]), int(people[i][2]) - 1
+                    people[i] = [i, int(people[i][1]), int(people[i][2]) - 1]
+
                 groups = [[0 for i in range(1)] for j in range(12)]
                 for i in range(len(people)):
                     groups[people[i][2]].append(people[i][0])
@@ -108,11 +105,9 @@
                 for i in range(len(people)):
                     del people[i][0]
                     del people[i][1]
-
-                # people = make_people("example.txt")
 
                 NUM_ROAMERS = len(people)
-                NUM_TABLES = int(js.getTables())
+                NUM_TABLES = int(Element("numberOfTables").value)
 
                 #Create a distance matrix for the quadratic assignment problem
                 table_distance_matrix = np.zeros((NUM_ROAMERS, NUM_ROAMERS))
@@ -130,7 +125,6 @@
                     remaining_roamers -= people_per_table
                     table_distance_matrix[startex:endex,startex:endex] = 1
                     startex += people_per_table
-
 
                 #Before we make a familiarity matrix (explained below), we want two helper methods
                 #First, we want a method that can increment directional weights of a matrix given a list.
@@ -202,15 +196,16 @@
                         return None
 
                     #Now start printing Assignments
-                    if current_week == 1:
-                        ID_NAME[0] = "xx" + ID_NAME[0]
-                    js.realPrint("Week " + str(current_week) + " Assignments")
+                    # if current_week == 1:
+                    #     ID_NAME[0] = "xx" + ID_NAME[0]
+                    result_place.element.innerHTML += "Week " + str(current_week) + " Assignments" + "<br>"
                     current_table = 1
+
                     for table in table_list:
-                        js.realPrint("Table " + str(current_table) + ": ", end = '')
+                        result_place.element.innerHTML += "Table " + str(current_table) + ": "
                         for person in table:
-                            js.realPrint(ID_NAME[person][2:] + ' ', end='')
-                        js.realPrint("")
+                            result_place.element.innerHTML += ID_NAME[person] + ' '
+                        result_place.element.innerHTML += "<br>"
                         current_table += 1
 
                     #Now we update the familiarity matrix with last week's table assignments
@@ -220,18 +215,28 @@
                         for person in table_list:
                             update_familiarity(person, table, 3)
                     current_week += 1
+                    result_place.element.innerHTML += "<br>"
+
+
+            async def test():
+                fileList = document.getElementById('studentList').files
+                file = 0
+                for f in fileList:
+                    file = f
+                
+                onload_event = create_proxy(read_complete)
+
+                reader = FileReader.new()
+
+                reader.onload = onload_event
+
+                reader.readAsText(file)
         </py-script>
-
-        <div class = "container border big" style = "display: none;" id = "tableDiv">
-            <button type="button" id="button" class = "btn btn-primary" pys-onClick = "run">Display Tables</button>
-            <br>
-        </div>
-
-        <script src="index.js"></script>
     </body>
+
+    <div style="clear:both;"></div>
 
     <footer class="text-center text-dark p-3 fixed-bottom" style="background-color: #f1f1f1;">
         Created by Oliver Lin, Rohan Jain, Gabriele Di Gianluca, and Nico von Eckartsberg of SSP UNC 2022.
-        <br>
     </footer>
 </html>
